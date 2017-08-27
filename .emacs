@@ -18,29 +18,36 @@
 	     '("marmalade" . "http://marmalade-repo.org/packages/"))
 
 
+(require 'cl)
+
 ;; Function to install all my packages
 (defun pkg-install (&rest packages)
   "Function to install list of packages."
   (interactive )
-  (package-refresh-contents)
-  (mapcar (lambda(pkg)
-	    (message (concat "--------" (symbol-name pkg) "-------"  )
-	    (if (not (eq nil pkg))
-		(progn
-		  (message "2:")
-		  (if (eq t (package-installed-p pkg))
-		      (progn
-			(message "3:")
-			(message "%s: has been already installed" (symbol-name pkg) ))
-		    (progn
-		      (message "4:")
+  ; Delete dups in list
+  (let ((pkgs (delete-dups packages)))
+    ; Check installed packages and delete it from list
+    (let ((install-pkgs (remove-if
+			 (lambda(item)
+			   (not (package-installed-p item)))
+			 pkgs)))
+      ; If we have an element in list
+      (if (> (length install-pkgs) 0)
+	  (progn
+	    ; Refresh
+	    (package-refresh-contents)
+	    (mapcar (lambda(pkg)
+		      (message (concat "--------" (symbol-name pkg) "-------"  ))
 		      (package-install pkg)
-		      (message "%s has been installed on init" (symbol-name pkg)))))
-	      (message (concat "nil package " (symbol-name pkg)) )) ))
-	  (delete-dups packages)))
+		      (message "%s has been installed on init" (symbol-name pkg))
+		      )
+		    install-pkgs))
+	)
+      )))
 
 ;; Initialize
 (package-initialize)
+
 
 ;; Install nessesary packages 
 (pkg-install
@@ -130,7 +137,7 @@
 ;; Set font Ubuntu Mono
 ;(set-frame-font "Ubuntu Mono derivative Powerline 13")
 ;(set-frame-font "Menlo 11")
-(set-frame-font "Ubuntu Mono 13")
+(set-frame-font "Ubuntu Mono 11")
 ;; Don't create backup
 (setq make-backup-files -1)
 
