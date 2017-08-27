@@ -17,39 +17,43 @@
 (add-to-list 'package-archives
 	     '("marmalade" . "http://marmalade-repo.org/packages/"))
 
+;; Initialize
+(package-initialize)
 
 (require 'cl)
 
 ;; Function to install all my packages
 (defun pkg-install (&rest packages)
-  "Function to install list of packages."
-  (interactive )
-  ; Delete dups in list
-  (let ((pkgs (delete-dups packages)))
-    ; Check installed packages and delete it from list
-    (let ((install-pkgs (remove-if
-			 (lambda(item)
-			   (not (package-installed-p item)))
-			 pkgs)))
-      ; If we have an element in list
-      (if (> (length install-pkgs) 0)
-	  (progn
-	    ; Refresh
-	    (package-refresh-contents)
-	    (mapcar (lambda(pkg)
-		      (message (concat "--------" (symbol-name pkg) "-------"  ))
-		      (package-install pkg)
-		      (message "%s has been installed on init" (symbol-name pkg))
-		      )
-		    install-pkgs))
-	)
-      )))
+  "Function to install list of PACKAGES."
+  (interactive)
+  (message "Start pkg-install!")
+  ; Exclude built-in packages list
+  (let ((exclude (list 'ido 'linum)))
+    ; Delete dups in list
+    (let ((pkgs (set-difference (delete-dups packages) exclude)))
+    
+      ; Check installed packages and delete it from list
+      (let ((install-pkgs (remove-if
+			   (lambda(item)
+			     (not (package-installed-p item)))
+			   pkgs)))
+        ; If we have an element in list
+	(if (> (length install-pkgs) 0)
+	    (progn
+	      ; Refresh
+	      (package-refresh-contents)
+	      (mapcar (lambda(pkg)
+			(message (concat "--------" (symbol-name pkg) "-------"  ))
+			(package-install pkg)
+			(message "%s has been installed on init" (symbol-name pkg))
+			)
+		      install-pkgs)
+	      (package-initialize))
+	  (message "No packages to install!"))))))
 
-;; Initialize
-(package-initialize)
 
 
-;; Install nessesary packages 
+;; Install nessesary packages
 (pkg-install
  'bs
  'hl-defined
@@ -79,7 +83,7 @@
 ;; set the path as terminal path [http://lists.gnu.org/archive/html/help-gnu-emacs/2011-10/msg00237.html]
 (setq-default explicit-bash-args (list "--login" "-i"))
 
-;; fix the PATH variable for GUI [http://clojure-doc.org/articles/tutorials/emacs.html#osx] 
+;; fix the PATH variable for GUI [http://clojure-doc.org/articles/tutorials/emacs.html#osx]
 (defun my:set-exec-path-from-shell-path ()
   "Fix path variable for GUI [http://clojure-doc.org/articles/tutorials/emacs.html#osx]."
   (let ((path-from-shell
@@ -134,10 +138,11 @@
 (electric-indent-mode 1)
 (electric-pair-mode 1)
 
-;; Set font Ubuntu Mono
-;(set-frame-font "Ubuntu Mono derivative Powerline 13")
-;(set-frame-font "Menlo 11")
-(set-frame-font "Ubuntu Mono 11")
+;; Set font
+(if (eq system-type 'darwin)
+    ;(set-frame-font "Ubuntu Mono derivative Powerline 13")
+    (set-frame-font "Menlo 11")
+  (set-frame-font "Ubuntu Mono 11"))
 ;; Don't create backup
 (setq make-backup-files -1)
 
@@ -148,7 +153,7 @@
 (setq debug-on-error t)
 
 ;; Don't ask about loading theme
-(setq sml/no-confirm-load-theme t)
+(setq-default sml/no-confirm-load-theme t)
 (setq custom-safe-themes t)
 
 ;; Mode-line(status-line)
@@ -198,18 +203,21 @@
 (size-indication-mode t)
 
 ;; For MacOs
-(setq mac-option-key-is-meta nil)
-(setq mac-command-key-is-meta t)
-(setq mac-command-modifier 'meta)
-(setq mac-option-modifier nil)
+(if (eq system-type 'darwin)
+    (progn
+      (setq-default mac-option-key-is-meta nil)
+      (setq-default mac-command-key-is-meta t)
+      (setq-default mac-command-modifier 'meta)
+      (setq-default mac-option-modifier nil)))
 
 ;; Resize window only for MacOS
 (if (eq system-type 'darwin)
-  (global-set-key (kbd "C-c <left>") 'shrink-window-horizontally)
-  (global-set-key (kbd "C-c <right>") 'enlarge-window-horizontally)
-  (global-set-key (kbd "C-c <down>") 'shrink-window)
-  (global-set-key (kbd "C-c <up>") 'enlarge-window)
-)
+    (progn
+      (global-set-key (kbd "C-c <left>") 'shrink-window-horizontally)
+      (global-set-key (kbd "C-c <right>") 'enlarge-window-horizontally)
+      (global-set-key (kbd "C-c <down>") 'shrink-window)
+      (global-set-key (kbd "C-c <up>") 'enlarge-window)))
+
 ;;; Packages
 
 ;; Dired
@@ -340,10 +348,12 @@
    (quote
     (groovy-mode gradle-mode kotlin-mode flycheck-kotlin meghanada chess flycheck-clojure color-theme-heroku color-theme-molokai color-theme-monokai clojure-mode soft-morning-theme atom-dark-theme solarized-theme yasnippet xah-find xah-elisp-mode vlf ubuntu-theme twilight-bright-theme smart-mode-line s rainbow-delimiters python-mode paper-theme mode-icons material-theme magit ipython hlinum hl-defined hemisu-theme flycheck flatui-theme evil emacsql-sqlite emacsql-psql ein cider-decompile ac-nrepl ac-helm ac-cider))))
 
-;;; .emacs ends here
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;;; .emacs ends here
