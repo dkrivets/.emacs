@@ -22,37 +22,45 @@
 (defun pkg-install (&rest packages)
   "Function to install list of packages."
   (interactive )
-  ;(package-refresh-contents)
+  (package-refresh-contents)
   (mapcar (lambda(pkg)
-	    (message "1:")
-	    (message pkg)
+	    (message (concat "--------" (symbol-name pkg) "-------"  )
 	    (if (not (eq nil pkg))
-		(if (package-installed-p pkg)
-		  (message "%s: has been already installed" (symbol-name pkg) )
-		  (let (p pkg)
-		    (package-install pkg)
-		    (message ("%s has been installed on init" (symbol-name p)))))))
+		(progn
+		  (message "2:")
+		  (if (eq t (package-installed-p pkg))
+		      (progn
+			(message "3:")
+			(message "%s: has been already installed" (symbol-name pkg) ))
+		    (progn
+		      (message "4:")
+		      (package-install pkg)
+		      (message "%s has been installed on init" (symbol-name pkg)))))
+	      (message (concat "nil package " (symbol-name pkg)) )) ))
 	  (delete-dups packages)))
 
 ;; Initialize
 (package-initialize)
 
 ;; Install nessesary packages 
-;(pkg-install
-; 'neotree
-; 'bs
-; 'hl-defined
-; 'magit
-; 'rainbow-delimiters
-; 'ido
-; 'linum
-; 'hlinum
-; 'auto-complete
-; 'clojure-mode
-; 'cider
-; 'ac-cider
-; 'python-mode
-; 'ipython)
+(pkg-install
+ 'bs
+ 'hl-defined
+ 'magit
+ 'rainbow-delimiters
+ 'ido
+ 'linum
+ 'hlinum
+ 'auto-complete
+ 'clojure-mode
+ 'cider
+ 'ac-cider
+ 'python-mode
+ 'ipython
+ 'flycheck
+ 'meghanada
+ 'twilight-bright-theme
+ 'soft-morning-theme)
 
 ;; Display the name of buffer
 (setq frame-title-format "GNU Emacs: %b")
@@ -121,7 +129,8 @@
 
 ;; Set font Ubuntu Mono
 ;(set-frame-font "Ubuntu Mono derivative Powerline 13")
-(set-frame-font "Menlo 11")
+;(set-frame-font "Menlo 11")
+(set-frame-font "Ubuntu Mono 13")
 ;; Don't create backup
 (setq make-backup-files -1)
 
