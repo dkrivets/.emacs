@@ -35,7 +35,7 @@
       ; Check installed packages and delete it from list
       (let ((install-pkgs (remove-if
 			   (lambda(item)
-			     (not (package-installed-p item)))
+			     (package-installed-p item))
 			   pkgs)))
         ; If we have an element in list
 	(if (> (length install-pkgs) 0)
