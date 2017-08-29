@@ -70,6 +70,7 @@
  'ipython
  'flycheck
  'meghanada
+ 'lua-mode
  'twilight-bright-theme
  'soft-morning-theme)
 
@@ -346,7 +347,7 @@
  '(kotlin-tab-width 4)
  '(package-selected-packages
    (quote
-    (groovy-mode gradle-mode kotlin-mode flycheck-kotlin meghanada chess flycheck-clojure color-theme-heroku color-theme-molokai color-theme-monokai clojure-mode soft-morning-theme atom-dark-theme solarized-theme yasnippet xah-find xah-elisp-mode vlf ubuntu-theme twilight-bright-theme smart-mode-line s rainbow-delimiters python-mode paper-theme mode-icons material-theme magit ipython hlinum hl-defined hemisu-theme flycheck flatui-theme evil emacsql-sqlite emacsql-psql ein cider-decompile ac-nrepl ac-helm ac-cider))))
+    (lua-mode groovy-mode gradle-mode kotlin-mode flycheck-kotlin meghanada chess flycheck-clojure color-theme-heroku color-theme-molokai color-theme-monokai clojure-mode soft-morning-theme atom-dark-theme solarized-theme yasnippet xah-find xah-elisp-mode vlf ubuntu-theme twilight-bright-theme smart-mode-line s rainbow-delimiters python-mode paper-theme mode-icons material-theme magit ipython hlinum hl-defined hemisu-theme flycheck flatui-theme evil emacsql-sqlite emacsql-psql ein cider-decompile ac-nrepl ac-helm ac-cider))))
 
 
 (custom-set-faces
