@@ -4,6 +4,8 @@
 (setq user-full-name "DKrivets")
 
 (setq debug-on-error t)
+
+(setq-default my:num-version "26.0.50")
 ;;; Package
 (require 'package)
 
@@ -15,7 +17,7 @@
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/"))
 (add-to-list 'package-archives
-	     '("marmalade" . "http://marmalade-repo.org/packages/"))
+	     '("marmalade" . "https://marmalade-repo.org/packages/"))
 
 ;; Initialize
 (package-initialize)
@@ -78,7 +80,8 @@
  'imenu-list
  'which-key
  'kaolin-themes
- 'apropospriate-theme)
+ 'apropospriate-theme
+ 'enh-ruby-mode)
 
 ;; Display the name of buffer
 (setq frame-title-format "GNU Emacs: %b")
@@ -122,6 +125,7 @@
 
 ;; Previous window
 (defun my:previous-window()
+  "Go to previous window."
   (interactive)
   (other-window -1))
 (global-set-key (kbd "C-x p") 'my:previous-window)
@@ -161,12 +165,14 @@
 (setq debug-on-error t)
 
 ;; Don't ask about loading theme
+; For SML
 (setq-default sml/no-confirm-load-theme t)
 (setq custom-safe-themes t)
 
 ;; Mode-line(status-line)
 ; No box border
 (set-face-attribute 'mode-line nil :box nil)
+
 ;; Set default theme
 ;(load-theme 'leuven)
 ;(load-theme 'twilight-bright t)
@@ -179,14 +185,16 @@
 ;    (load-theme 'twilight-bright t)
 ;    (load-theme 'soft-morning t))
 (if (display-graphic-p)
-    (load-theme 'kaolin-aurora t)
+    ;(load-theme 'kaolin-aurora t)
+    (load-theme 'spacemacs-light t)
     (load-theme 'apropospriate-light t))
 
 ;; Scroll
 ;; scroll step
 (setq scroll-step 1)
+
 ;; hl-line
-(global-hl-line-mode 1)
+;;(global-hl-line-mode 1)
 
 ;; Change buffer mode
 ;;(iswitchb-mode t)
@@ -232,13 +240,44 @@
       (global-set-key (kbd "C-c <down>") 'shrink-window)
       (global-set-key (kbd "C-c <up>") 'enlarge-window)))
 
+;;; Functions
+(defun my:hide-line-num ()
+  "Hide line number in buffer."
+  (interactive)
+  (if (version< emacs-version my:num-version)
+      (linum-mode -1)
+    (display-line-numbers-mode -1))
+  (message "my:hide-linum-num"))
+
+(defun my:dired-mode-setup ()
+  "To be run as hook for `dired-mode'."
+  (dired-hide-details-mode 1)
+  ;; Don't want show lines.
+  (my:hide-line-num)
+  ;; ERROR: dired-use-ls-dired
+  (when (string= system-type "darwin")
+    (setq dired-use-ls-dired nil)))
+
 ;;; Packages
 
 ;; Dired
-(defun my:dired-mode-setup ()
-  "To be run as hook for `dired-mode'."
-  (dired-hide-details-mode 1))
+(require 'dired)
 (add-hook 'dired-mode-hook 'my:dired-mode-setup)
+;; Open file/dir without creating a new buffer
+;; Enable function
+(put 'dired-find-alternate-file 'disabled nil)
+;; Old/default variant is dired-advertised-find-file
+(define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+;; Old/default variant is dired-up-directory
+(define-key dired-mode-map (kbd "^") (lambda()
+				       (interactive)
+				       (find-alternate-file "..")))
+
+;; Shell
+; Hide line numbers 
+(add-hook 'shell-mode-hook (lambda() (my:hide-line-num)))
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+(add-hook 'shell-mode-hook 'ansi-color-process-output)
 
 ;; Powerline and themes: airline-themes
 ;(require 'cl)
@@ -273,10 +312,19 @@
 (ido-everywhere t)
 (setq ido-enable-flex-matching t)
 
-;; Linum mode
-(require 'linum)
-(setq linum-format "%4d")
-(global-linum-mode 1)
+;; Line numbers
+(if (version< emacs-version my:num-version)
+    ;; we will use linum
+    (progn
+      ;; Linum mode
+      (require 'linum)
+      (setq linum-format "%4d")
+      (global-linum-mode 1))
+  ;; Else we can use build-in mode
+  (progn
+    ;(display-line-numbers-mode t)
+    (global-display-line-numbers-mode t)))
+
 
 ;; hlinum
 ; highline cursor line
@@ -346,10 +394,14 @@
 
 ;; imenu-list
 (require 'imenu-list)
-(global-set-key (kbd "C-.") #'imenu-list-smart-mode)
+(global-set-key (kbd "C-c .") #'imenu-list-smart-toggle)
 (setq imenu-list-focus-after-activation t)
 (setq imenu-list-auto-resize t)
 (setq imenu-list-mode-line-format nil)
+
+(add-hook 'imenu-list-major-mode-hook 'my:hide-line-num)
+(add-hook 'imenu-list-after-jump-hook 'my:hide-line-num)
+(add-hook 'imenu-list-update-hook #'my:hide-line-num)
 
 
 ;; All the icons (all-the-icons)
@@ -365,9 +417,9 @@
 ;;
 ;;(defun ruby-set-imenu-generic-expression()
 ;;    (make-local-variable 'imenu-generic-expression)
-;;    (make-local-variable 'imenu-create-index-function) 
-;;    (setq imenu-create-index-function 'imenu-default-create-index-function) 
-;;    (setq imenu-generic-expression ruby-imenu-generic-expression)) 
+;;    (make-local-variable 'imenu-create-index-function)
+;;    (setq imenu-create-index-function 'imenu-default-create-index-function)
+;;    (setq imenu-generic-expression ruby-imenu-generic-expression))
 ;;
 ;;(add-hook 'ruby-mode-hook 'ruby-set-imenu-generic-expression)
 
@@ -476,7 +528,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (apropospriate-theme kaolin-themes color-theme-github monokai-theme which-key imenu-list rsense command-log-mode all-the-icons all-the-icons-dired espresso-theme lua-mode groovy-mode gradle-mode kotlin-mode flycheck-kotlin meghanada chess flycheck-clojure color-theme-heroku color-theme-molokai color-theme-monokai clojure-mode soft-morning-theme atom-dark-theme solarized-theme yasnippet xah-find xah-elisp-mode vlf ubuntu-theme twilight-bright-theme smart-mode-line s rainbow-delimiters python-mode paper-theme mode-icons material-theme magit ipython hlinum hl-defined hemisu-theme flycheck flatui-theme evil emacsql-sqlite emacsql-psql ein cider-decompile ac-nrepl ac-helm ac-cider)))
+    (gnugo spacemacs-theme enh-ruby-mode apropospriate-theme kaolin-themes color-theme-github monokai-theme which-key imenu-list rsense command-log-mode all-the-icons all-the-icons-dired espresso-theme lua-mode groovy-mode gradle-mode kotlin-mode flycheck-kotlin meghanada chess flycheck-clojure color-theme-heroku color-theme-molokai color-theme-monokai clojure-mode soft-morning-theme atom-dark-theme solarized-theme yasnippet xah-find xah-elisp-mode vlf ubuntu-theme twilight-bright-theme smart-mode-line s rainbow-delimiters python-mode paper-theme mode-icons material-theme magit ipython hlinum hl-defined hemisu-theme flycheck flatui-theme evil emacsql-sqlite emacsql-psql ein cider-decompile ac-nrepl ac-helm ac-cider)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
