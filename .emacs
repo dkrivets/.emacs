@@ -93,6 +93,8 @@
 ;; set the path as terminal path [http://lists.gnu.org/archive/html/help-gnu-emacs/2011-10/msg00237.html]
 (setq-default explicit-bash-args (list "--login" "-i"))
 
+;(setq ansi-term-color-vector [term term-color-black term-color-red term-color-green term-color-yellow term-color-blue term-color-magenta term-color-cyan term-color-white])
+
 ;; fix the PATH variable for GUI [http://clojure-doc.org/articles/tutorials/emacs.html#osx]
 (defun my:set-exec-path-from-shell-path ()
   "Fix path variable for GUI [http://clojure-doc.org/articles/tutorials/emacs.html#osx]."
@@ -187,7 +189,9 @@
 (if (display-graphic-p)
     ;(load-theme 'kaolin-aurora t)
     (load-theme 'spacemacs-light t)
-    (load-theme 'apropospriate-light t))
+    ;(load-theme 'apropospriate-light t))
+  (load-theme 'monokai t))
+
 
 ;; Scroll
 ;; scroll step
@@ -230,7 +234,9 @@
       (setq-default mac-option-key-is-meta nil)
       (setq-default mac-command-key-is-meta t)
       (setq-default mac-command-modifier 'meta)
-      (setq-default mac-option-modifier nil)))
+      (setq-default mac-option-modifier nil)
+      (setq mac-allow-anti-aliasing t)    ;; turn on anti-aliasing (default)
+      ))
 
 ;; Resize window only for MacOS
 (if (eq system-type 'darwin)
@@ -240,23 +246,29 @@
       (global-set-key (kbd "C-c <down>") 'shrink-window)
       (global-set-key (kbd "C-c <up>") 'enlarge-window)))
 
+
+
 ;;; Functions
 (defun my:hide-line-num ()
   "Hide line number in buffer."
   (interactive)
+  (message "my:hide-linum-num START")
   (if (version< emacs-version my:num-version)
       (linum-mode -1)
     (display-line-numbers-mode -1))
-  (message "my:hide-linum-num"))
+  (message "my:hide-linum-num FINISH"))
 
 (defun my:dired-mode-setup ()
   "To be run as hook for `dired-mode'."
+  (interactive)
+  (message "my:dired-mode-setup START")
   (dired-hide-details-mode 1)
   ;; Don't want show lines.
   (my:hide-line-num)
   ;; ERROR: dired-use-ls-dired
   (when (string= system-type "darwin")
-    (setq dired-use-ls-dired nil)))
+    (setq dired-use-ls-dired nil))
+    (message "my:dired-mode-setup FINISH"))
 
 ;;; Packages
 
@@ -274,10 +286,18 @@
 				       (find-alternate-file "..")))
 
 ;; Shell
-; Hide line numbers 
-(add-hook 'shell-mode-hook (lambda() (my:hide-line-num)))
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-(add-hook 'shell-mode-hook 'ansi-color-process-output)
+; Hide line numbers
+(add-hook 'shell-mode-hook (lambda()
+			     (message "shell-mode-hook START")
+			     (my:hide-line-num)
+			     (message "shell-mode-hook FINISH")))
+;(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+;(add-hook 'shell-mode-hook 'ansi-color-process-output)
+; Using bash
+(setq-default shell-file-name "/bin/bash")
+; Change prompt
+(setenv "PS1" ">")
+(setenv "PROMPT" ">")
 
 ;; Powerline and themes: airline-themes
 ;(require 'cl)
@@ -351,6 +371,17 @@
 
 (add-hook 'auto-complete-mode-hook 'my:set-auto-complete-as-completion-at-point-function)
 (add-hook 'cider-mode-hook 'my:set-auto-complete-as-completion-at-point-function)
+
+
+;;; Ruby
+;; Enh-ruby-mode
+(require 'enh-ruby-mode)
+(add-to-list 'auto-mode-alist '("\\.rb$" . enh-ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.rake$" . enh-ruby-mode))
+(add-to-list 'interpreter-mode-alist '("ruby" . enh-ruby-mode))
+;; Robe
+(require 'robe)
+(add-hook 'ruby-mode-hook 'robe-mode)
 
 
 ;; Cider
@@ -486,7 +517,7 @@
  '(cua-read-only-cursor-color "#859900")
  '(custom-safe-themes
    (quote
-    ("c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "5a0eee1070a4fc64268f008a4c7abfda32d912118e080e18c3c865ef864d1bea" "4455435a66dba6e81d55a843c9c7e475a7a935271bf63a1dfe9f01ed2a4d7572" "fc524ddf651fe71096d0012b1c34d08e3f20b20fb1e1b972de4d990b2e793339" "c4d3cbd4f404508849e4e902ede83a4cb267f8dff527da3e42b8103ec8482008" "f72ccaa311763cb943de5f9f56a0d53b0009b772f4d05f47835aa08011797aa8" "7e362b29da8aa9447b51c2b354d8df439db33b3612ddd5baa34ad3de32206d83" "b8bb8a91752c68df1de3b790fe5bbe5e39441488d19851654ee0d2875bc6f94b" "9076ed00a3413143191cb9324d9426df38d83fb6dba595afbd43983db1015ef4" "f9567e839389f2f0a1ede73d1c3e3bd2c9ed93adaf6bb7d13e579ea2b15fcef8" "b7d967c53f4e3dfc1f847824ffa3f902de44d3a99b12ea110e0ec2fcec24501d" "c3e6b52caa77cb09c049d3c973798bc64b5c43cc437d449eacf35b3e776bf85c" "c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "663a653b805b97978c624687b67861f80dddceffc3ae434aa4c60bd22d12e70b" "a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" "732b807b0543855541743429c9979ebfb363e27ec91e82f463c91e68c772f6e3" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "e9460a84d876da407d9e6accf9ceba453e2f86f8b86076f37c08ad155de8223c" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" "7e376fb329a0e46a04e8285b0e45199a083f98c69b0e1039ec1cb1d366e66e9c" "a1289424bbc0e9f9877aa2c9a03c7dfd2835ea51d8781a0bf9e2415101f70a7e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "15348febfa2266c4def59a08ef2846f6032c0797f001d7b9148f30ace0d08bcf" default)))
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "5a0eee1070a4fc64268f008a4c7abfda32d912118e080e18c3c865ef864d1bea" "4455435a66dba6e81d55a843c9c7e475a7a935271bf63a1dfe9f01ed2a4d7572" "fc524ddf651fe71096d0012b1c34d08e3f20b20fb1e1b972de4d990b2e793339" "c4d3cbd4f404508849e4e902ede83a4cb267f8dff527da3e42b8103ec8482008" "f72ccaa311763cb943de5f9f56a0d53b0009b772f4d05f47835aa08011797aa8" "7e362b29da8aa9447b51c2b354d8df439db33b3612ddd5baa34ad3de32206d83" "b8bb8a91752c68df1de3b790fe5bbe5e39441488d19851654ee0d2875bc6f94b" "9076ed00a3413143191cb9324d9426df38d83fb6dba595afbd43983db1015ef4" "f9567e839389f2f0a1ede73d1c3e3bd2c9ed93adaf6bb7d13e579ea2b15fcef8" "b7d967c53f4e3dfc1f847824ffa3f902de44d3a99b12ea110e0ec2fcec24501d" "c3e6b52caa77cb09c049d3c973798bc64b5c43cc437d449eacf35b3e776bf85c" "c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "663a653b805b97978c624687b67861f80dddceffc3ae434aa4c60bd22d12e70b" "a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" "732b807b0543855541743429c9979ebfb363e27ec91e82f463c91e68c772f6e3" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "e9460a84d876da407d9e6accf9ceba453e2f86f8b86076f37c08ad155de8223c" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" "7e376fb329a0e46a04e8285b0e45199a083f98c69b0e1039ec1cb1d366e66e9c" "a1289424bbc0e9f9877aa2c9a03c7dfd2835ea51d8781a0bf9e2415101f70a7e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "15348febfa2266c4def59a08ef2846f6032c0797f001d7b9148f30ace0d08bcf" default)))
  '(evil-emacs-state-cursor (quote ("#D50000" hbar)))
  '(evil-insert-state-cursor (quote ("#D50000" bar)))
  '(evil-normal-state-cursor (quote ("#F57F17" box)))
@@ -528,7 +559,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (gnugo spacemacs-theme enh-ruby-mode apropospriate-theme kaolin-themes color-theme-github monokai-theme which-key imenu-list rsense command-log-mode all-the-icons all-the-icons-dired espresso-theme lua-mode groovy-mode gradle-mode kotlin-mode flycheck-kotlin meghanada chess flycheck-clojure color-theme-heroku color-theme-molokai color-theme-monokai clojure-mode soft-morning-theme atom-dark-theme solarized-theme yasnippet xah-find xah-elisp-mode vlf ubuntu-theme twilight-bright-theme smart-mode-line s rainbow-delimiters python-mode paper-theme mode-icons material-theme magit ipython hlinum hl-defined hemisu-theme flycheck flatui-theme evil emacsql-sqlite emacsql-psql ein cider-decompile ac-nrepl ac-helm ac-cider)))
+    (robe spaceline gnugo spacemacs-theme enh-ruby-mode apropospriate-theme kaolin-themes color-theme-github monokai-theme which-key imenu-list rsense command-log-mode all-the-icons all-the-icons-dired espresso-theme lua-mode groovy-mode gradle-mode kotlin-mode flycheck-kotlin meghanada chess flycheck-clojure color-theme-heroku color-theme-molokai color-theme-monokai clojure-mode soft-morning-theme atom-dark-theme solarized-theme yasnippet xah-find xah-elisp-mode vlf ubuntu-theme twilight-bright-theme smart-mode-line s rainbow-delimiters python-mode paper-theme mode-icons material-theme magit ipython hlinum hl-defined hemisu-theme flycheck flatui-theme evil emacsql-sqlite emacsql-psql ein cider-decompile ac-nrepl ac-helm ac-cider)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
@@ -577,5 +608,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(message "Configure has been loaded!")
 
 ;;; .emacs ends here
