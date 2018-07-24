@@ -5,7 +5,8 @@
 
 (setq debug-on-error t)
 
-(setq-default my:num-version "26.0.50")
+;(setq-default my:num-version "26.0.50")
+(defvar my:num-version "26.0.50" "Emacs version.")
 ;;; Package
 (require 'package)
 
@@ -226,7 +227,7 @@
 (size-indication-mode t)
 
 ;; Clipboard setting
-(setq x-select-enable-clipboard t)
+(setq select-enable-clipboard t)
 
 ;; For MacOs
 (if (eq system-type 'darwin)
@@ -241,8 +242,8 @@
 ;; Resize window only for MacOS
 (if (eq system-type 'darwin)
     (progn
-      (global-set-key (kbd "C-c <left>") 'shrink-window-horizontally)
-      (global-set-key (kbd "C-c <right>") 'enlarge-window-horizontally)
+      (global-set-key (kbd "C-c <left>") 'shrink-window-horizontally)   ;; It's also C-x {
+      (global-set-key (kbd "C-c <right>") 'enlarge-window-horizontally) ;; It's also C-x }
       (global-set-key (kbd "C-c <down>") 'shrink-window)
       (global-set-key (kbd "C-c <up>") 'enlarge-window)))
 
@@ -267,7 +268,7 @@
   (my:hide-line-num)
   ;; ERROR: dired-use-ls-dired
   (when (string= system-type "darwin")
-    (setq dired-use-ls-dired nil))
+    (setq-default dired-use-ls-dired nil))
     (message "my:dired-mode-setup FINISH"))
 
 ;;; Packages
@@ -338,7 +339,7 @@
     (progn
       ;; Linum mode
       (require 'linum)
-      (setq linum-format "%4d")
+      (setq-default linum-format "%4d")
       (global-linum-mode 1))
   ;; Else we can use build-in mode
   (progn
@@ -467,7 +468,7 @@
 ;           (setq name (or (match-string 4) (match-string 6)))
 ;           (setq pos (match-beginning 0))
 ;           (cond
-;            ((or (string= "get" decl) (string= "post" decl) 
+;            ((or (string= "get" decl) (string= "post" decl)
 ;                (string= "context" decl) (string= "describe" decl))
 ;             (setq name (concat decl " " (replace-regexp-in-string "['\"]" "" name)))
 ;             (if prefix (setq name (concat prefix name)))
